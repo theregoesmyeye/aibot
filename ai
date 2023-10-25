@@ -1,0 +1,57 @@
+#!/bin/bash
+
+config_file="$HOME/.ai_script_config"
+
+if [ "$1" == "-c" ]; then
+  rm -f "$config_file"
+  echo "API key has been cleared from the configuration."
+  exit 0
+fi
+
+if [ -f "$config_file" ]; then
+  source "$config_file"
+fi
+
+if [ -z "$OPENAI_API_KEY" ]; then
+  read -p "Enter your OpenAI API key: " api_key
+  # Save the API key to the configuration file
+  echo "OPENAI_API_KEY=\"$api_key\"" > "$config_file"
+  echo "API key has been saved to the configuration file. To remove the API key, run 'ai -c'"
+  OPENAI_API_KEY="$api_key"  # Set the API key for immediate use
+fi
+
+if [ -z "$1" ]; then
+  echo "Usage: $0 [-c] <text>"
+  exit 1
+fi
+
+request='{
+  "model": "gpt-3.5-turbo",
+  "messages": [
+    {
+      "role": "user",
+      "content": "'"$1"'"
+    }
+  ],
+  "temperature": 1,
+  "max_tokens": 256,
+  "top_p": 1,
+  "frequency_penalty": 0,
+  "presence_penalty": 0
+}'
+
+# Make the curl request and store the response in a variable
+response=$(curl -s -X POST https://api.openai.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $OPENAI_API_KEY" \
+  -d "$request")
+
+# Extract and format the content from the response
+formatted_response="AI: $(echo "$response" | jq -r '.choices[0].message.content')"
+
+# Define ANSI escape codes for purple text
+purple="\033[0;35m"
+reset="\033[0m"
+
+# Print the formatted response in purple text
+echo -e "${purple}$formatted_response${reset}"
