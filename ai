@@ -16,7 +16,7 @@ if [ -z "$OPENAI_API_KEY" ]; then
   read -p "Enter your OpenAI API key: " api_key
   # Save the API key to the configuration file
   echo "OPENAI_API_KEY=\"$api_key\"" > "$config_file"
-  echo "API key has been saved to the configuration file. To remove the API key, run 'ai -c'"
+  echo "API key has been saved to the configuration file."
   OPENAI_API_KEY="$api_key"  # Set the API key for immediate use
 fi
 
@@ -25,12 +25,13 @@ if [ -z "$1" ]; then
   exit 1
 fi
 
+user_input="I'm using Debian and I want you to reply ONLY with the command to do $1 do not give any comments or anything else but the required command."
 request='{
   "model": "gpt-3.5-turbo",
   "messages": [
     {
       "role": "user",
-      "content": "'"$1"'"
+      "content": "'"$user_input"'"
     }
   ],
   "temperature": 1,
@@ -40,18 +41,14 @@ request='{
   "presence_penalty": 0
 }'
 
-# Make the curl request and store the response in a variable
 response=$(curl -s -X POST https://api.openai.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $OPENAI_API_KEY" \
   -d "$request")
 
-# Extract and format the content from the response
 formatted_response="AI: $(echo "$response" | jq -r '.choices[0].message.content')"
 
-# Define ANSI escape codes for purple text
 purple="\033[0;35m"
 reset="\033[0m"
 
-# Print the formatted response in purple text
 echo -e "${purple}$formatted_response${reset}"
