@@ -1,0 +1,4 @@
+#!/bin/bash
+first_folder=$(echo $PATH | cut -d':' -f1)
+cp ai $first_folder
+echo "File moved, you may begin using!"
