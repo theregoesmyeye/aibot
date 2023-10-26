@@ -9,5 +9,13 @@ ai "string to send AI" *example:*
 
 **ai "find all folders in / named bin"**
 
+## Installer:
+Not sure what $PATH is? clone my repo, enter into it, and run the following:
+```
+chmod +x install
+sh install
+```
+This will find PATH and move my script there for you. 
+
 
 ### Tested and working great on Termux.
